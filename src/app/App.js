@@ -12,11 +12,12 @@ function TodoAdder(props){
   return <div>
     <fieldset>
       <input 
-      type="text" 
+      type="text"
+      name="todoContent"
       value={props.newTodo.content} 
       placeholder="添加新待办事项"
       onChange={ e => props.newTodoChangeHandler(e) } />
-      <button onClick={ () => { props.addNewTodo } }>新增</button>
+      <button disabled={!props.newTodo.content} onClick={ props.addNewTodo }>新增</button>
     </fieldset>
   </div>
 }
@@ -45,22 +46,25 @@ export default class Todo extends React.Component{
     this.addNewTodo = this.addNewTodo.bind(this);
     this.newTodoUpdateHandler = this.newTodoUpdateHandler.bind(this);
     this.finisheTodo = this.finisheTodo.bind(this);
+    this.removeTodo = this.removeTodo.bind(this);
   }
 
   newTodoUpdateHandler(e){
     this.setState({
       newTodo: {
-        content: e.value
+        content: e.target.value,
+        finished: false
       }
     });
   }
 
   addNewTodo(){
-    let todos = this.state.todos.concat.slice();
+    let todos = this.state.todos.slice();
     todos.unshift(this.state.newTodo);
     this.setState({
-      todos: todos
-    })
+      todos: todos,
+      newTodo: { content: ' ', finished: false }
+    });
   }
 
   finisheTodo(todo){
@@ -72,15 +76,24 @@ export default class Todo extends React.Component{
     })
   }
 
+  removeTodo(todo){
+    let todos = this.state.todos.slice();
+    let toRemoveTodoIndex = todos.indexOf(todo);
+    todos.splice(toRemoveTodoIndex, 1);
+    this.setState({
+      todos: todos
+    })
+  }
+
   render(){
     const unCompleteTodos = this.state.todos.filter( todo => todo.finished === false );
     return <div className="todo-app">
       <TodoHeader count={unCompleteTodos.length} />
-      <TodoAdder 
+      <TodoAdder
       newTodo={this.state.newTodo}
       addNewTodo={this.addNewTodo}
       newTodoChangeHandler={this.newTodoUpdateHandler}/>
-      <TodoList todos={this.state.todos} finishTodo={this.finisheTodo} />
+      <TodoList removeTodo={this.removeTodo} todos={this.state.todos} finishTodo={this.finisheTodo} />
     </div>
   }
 }
